@@ -57,6 +57,7 @@ void MouseState::update(double delta)
 		//sets up initial rectangle position
 		selectRect.setPosition(initPosition.x, initPosition.y);
 	}
+	//If the left mouse button goes up then this code is executed.
 	else if (LeftButtonDown == false && LastLeftButtonDown == true)
 	{
 		LastLeftButtonDown = false;
@@ -67,7 +68,6 @@ void MouseState::update(double delta)
 		{
 			if (std::sqrt(std::pow((Position.y - initPosition.y), 2)) / (Position.y - initPosition.y) == 1)
 			{
-
 				initPosition.x = initPosition.x + selectRect.getSize().x;
 				selectRect.setSize(sf::Vector2f(selectRect.getSize().x*-1, selectRect.getSize().y));
 			}
@@ -90,7 +90,6 @@ void MouseState::update(double delta)
 				selectRect.setSize(sf::Vector2f(selectRect.getSize().x, selectRect.getSize().y*-1));
 			}
 		}
-
 		TempUnitContainer = gamemap->retrieveUnits(std::round(initPosition.x / 64), std::round(initPosition.y / 64), std::round(selectRect.getSize().x / 64), std::round(selectRect.getSize().y / 64));
 		selectRect.setSize(sf::Vector2f(0, 0));
 		curs.sleep = false;
@@ -122,11 +121,7 @@ void MouseState::update(double delta)
 			curs.visual.setPosition(MousePosScrolling);
 			moved = false;
 		}			
-		else
-		{
-			
-		}
-			//type changing
+		//type changing
 		break;
 	case GivingOrder:
 		//Unit Interaction
@@ -150,6 +145,7 @@ void MouseState::update(double delta)
 				//This line make units switch into the "moving" state
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
 			}
+			TempUnitContainer.clear();
 		}
 		currstate = Idle;
 		break;

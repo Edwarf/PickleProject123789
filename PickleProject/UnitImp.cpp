@@ -78,7 +78,6 @@ void Unit::turn(double delta)
 	double currentAngle = visual.getRotation();
 	double targetAngle = (180/3.14)*(std::atan2(desiredpos.y - positionfloat.y , desiredpos.x - positionfloat.x));
 	visual.setRotation(targetAngle+90*-1);
-	std::cout << targetAngle+90 << std::endl;
 }
 LandUnit::LandUnit()
 {
