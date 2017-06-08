@@ -63,7 +63,7 @@ void Unit::CustomMove(double delta)
 		{
 			positionfloat += MoveInterval;
 			//Sets unit on map
-			//gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
+			gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
 			visual.setPosition(positionfloat.x * 64, positionfloat.y * 64);
 			turn(delta);
 		}

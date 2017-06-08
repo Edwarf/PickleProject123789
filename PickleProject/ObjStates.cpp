@@ -60,6 +60,7 @@ void MouseState::update(double delta)
 	//If the left mouse button goes up then this code is executed.
 	else if (LeftButtonDown == false && LastLeftButtonDown == true)
 	{
+		TempUnitContainer.clear();
 		LastLeftButtonDown = false;
 		currstate = Idle;
 		//THE IF/ELSEIF BELOW REORIENT THE ORIGIN OF THE RECTANGLE TO THE TOP LEFT. DON'T EDIT(ITS FUCKING WEIRD) IF YOU DON'T WANT TO CHANGE RECT BEHAVIOR. 
@@ -135,14 +136,13 @@ void MouseState::update(double delta)
 		//Movement
 		else if(TempUnitContainer.size() > 0);
 		{		
-			TempUnitContainer.clear();
 			//this code simply moves
 			for (int i = 0; i < TempUnitContainer.size(); i++)
 			{
 				//implicit conversion to float done here. This provides the point to which units will move
 				TempUnitContainer[i]->desiredpos.x = orderPosition.x / 64;
-				TempUnitContainer[i]->desiredpos.y = orderPosition.y / 64;
 				//This line make units switch into the "moving" state
+				TempUnitContainer[i]->desiredpos.y = orderPosition.y / 64;
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
 			}
 		}
