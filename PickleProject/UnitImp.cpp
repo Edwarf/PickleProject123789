@@ -90,7 +90,58 @@ void Unit::render(sf::RenderWindow* wind)
 	wind->draw(visual);
 
 }
-
+std::vector<UnitDependencies::TileDirection> Unit::pathCheck(double delta)
+{
+	std::vector<UnitDependencies::TileDirection> returner;
+	//Simulating movement
+	sf::Vector2f updiagnolleft(positionfloat.x - Speed*delta, positionfloat.y + Speed*delta);
+	sf::Vector2f directionupdiagleft = normalize(updiagnolleft - positionfloat);
+	sf::Vector2f MoveIntervalupdiagleft(directionupdiagleft.x*Speed*delta, directionupdiagleft.y*Speed*delta);
+	//Definitions for updiagright
+	sf::Vector2f updiagnolright(positionfloat.x + Speed*delta, positionfloat.y + Speed*delta);
+	sf::Vector2f directionupdiagright = normalize(updiagnolright - positionfloat);
+	sf::Vector2f MoveIntervalupdiagright(directionupdiagright.x*Speed*delta, directionupdiagright.y*Speed*delta);
+	//End of updiagright definitions
+	//Definitions for UP
+	sf::Vector2f up(positionfloat.x, positionfloat.y + Speed*delta);
+	sf::Vector2f directionup = normalize(up - positionfloat);
+	sf::Vector2f MoveIntervalup(directionup.x*Speed*delta, directionup.y*Speed*delta);
+	//End of UP definitions
+	//Definitions for LEFT
+	sf::Vector2f left(positionfloat.x - Speed*delta, positionfloat.y);
+	sf::Vector2f directionleft = normalize(left - positionfloat);
+	sf::Vector2f MoveIntervalleft(directionleft.x*Speed*delta, directionleft.y*Speed*delta);
+	//End of LEFT definitions
+	//Definitions for RIGHT
+	sf::Vector2f right(positionfloat.x + Speed*delta, positionfloat.y);
+	sf::Vector2f directionright = normalize(right - positionfloat);
+	sf::Vector2f MoveIntervalright(directionright.x*Speed*delta, directionright.y*Speed*delta);
+	//Definitions for Down
+	//If statement checks if there are no obstructions. If there are no obstructions, this direction is added to the list of possible directions
+	if (gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalupdiagleft.x)][std::round(positionfloat.y + MoveIntervalupdiagleft.y)].currunit == nullptr && gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalupdiagleft.x)][std::round(positionfloat.y + MoveIntervalupdiagleft.y)].type == availabletyles)
+	{
+		returner.push_back(UnitDependencies::UPDIAGNOLLEFT);
+	}
+	if (gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalup.x)][std::round(positionfloat.y + MoveIntervalup.y)].currunit == nullptr && gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalup.x)][std::round(positionfloat.y + MoveIntervalup.y)].type == availabletyles)
+	{
+		returner.push_back(UnitDependencies::UP);
+	}
+	if (gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalupdiagright.x)][std::round(positionfloat.y + MoveIntervalupdiagright.y)].currunit == nullptr && gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalupdiagright.x)][std::round(positionfloat.y + MoveIntervalupdiagright.y)].type == availabletyles)
+	{
+		returner.push_back(UnitDependencies::UPDIAGNOLRIGHT);
+	}
+	if (gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalleft.x)][std::round(positionfloat.y + MoveIntervalleft.y)].currunit == nullptr && gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalleft.x)][std::round(positionfloat.y + MoveIntervalleft.y)].type == availabletyles)
+	{
+		returner.push_back(UnitDependencies::LEFT);
+	}
+	if (gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalright.x)][std::round(positionfloat.y + MoveIntervalright.y)].currunit == nullptr && gamemap->tilegrid[std::round(positionfloat.x + MoveIntervalright.x)][std::round(positionfloat.y + MoveIntervalright.y)].type == availabletyles)
+	{
+		returner.push_back(UnitDependencies::RIGHT);
+	}
+	
+	//Stationary is in the logical order next(going left to right for every level, but it will be at the bottom due to its condition 
+	return returner;
+}
 void Unit::CustomMove(double delta)
 
 {
@@ -100,10 +151,9 @@ void Unit::CustomMove(double delta)
 	if (std::round(desiredpos.x) != std::round(positionfloat.x) || std::round(desiredpos.y) != std::round(positionfloat.y))
 
 	{
-
 		//clears the previous tile
-
 		gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = nullptr;
+
 
 		//Normalizes the difference between vectors
 
@@ -114,25 +164,17 @@ void Unit::CustomMove(double delta)
 		//Checks if the tile unit will enter is occupied
 
 		if (gamemap->tilegrid[std::round(positionfloat.x + MoveInterval.x)][std::round(positionfloat.y + MoveInterval.y)].currunit != nullptr || gamemap->tilegrid[std::round(positionfloat.x + MoveInterval.x)][std::round(positionfloat.y + MoveInterval.y)].type != availabletyles)
-
 		{
-
+			gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
 			currstate = UnitDependencies::IDLE;
-
 		}
 
 		else
-
 		{
-
 			positionfloat += MoveInterval;
-
 			//Sets unit on map
-
 			gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
-
 			visual.setPosition(positionfloat.x * 64, positionfloat.y * 64);
-
 			turn(delta);
 
 		}

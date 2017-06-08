@@ -12,7 +12,19 @@ class UnitDependencies
 {
 
 public:
-
+	enum TileDirection
+	{
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT,
+		UPDIAGNOLRIGHT,
+		UPDIAGNOLLEFT,
+		DOWNDIAGNOLRIGHT,
+		DOWNDIAGNOLLEFT,
+		//Stationary denotes to the same tile 
+		STATIONARY
+	};
 	enum UnitStates
 
 	{
@@ -52,7 +64,8 @@ public:
 	Unit();
 
 	TileDependencies::tileType availabletyles;
-
+	//Returns all available tile directions
+	std::vector<UnitDependencies::TileDirection> pathCheck(double delta);
 	map* gamemap;
 
 	enum AttackType

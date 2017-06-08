@@ -130,5 +130,6 @@ std::vector<Unit*> map::retrieveUnits(int x, int y, int height, int width)
 			}
 		}
 	}
+	std::cout << returner.size() << std::endl;
 	return returner;
 }
