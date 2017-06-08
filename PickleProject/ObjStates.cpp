@@ -63,7 +63,6 @@ void MouseState::update(double delta)
 		LastLeftButtonDown = false;
 		currstate = Idle;
 		//THE IF/ELSEIF BELOW REORIENT THE ORIGIN OF THE RECTANGLE TO THE TOP LEFT. DON'T EDIT(ITS FUCKING WEIRD) IF YOU DON'T WANT TO CHANGE RECT BEHAVIOR. 
-
 		if (std::sqrt(std::pow((Position.x - initPosition.x), 2)) / (Position.x - initPosition.x) == -1)
 		{
 			if (std::sqrt(std::pow((Position.y - initPosition.y), 2)) / (Position.y - initPosition.y) == 1)
@@ -136,6 +135,7 @@ void MouseState::update(double delta)
 		//Movement
 		else if(TempUnitContainer.size() > 0);
 		{		
+			TempUnitContainer.clear();
 			//this code simply moves
 			for (int i = 0; i < TempUnitContainer.size(); i++)
 			{
@@ -145,7 +145,6 @@ void MouseState::update(double delta)
 				//This line make units switch into the "moving" state
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
 			}
-			TempUnitContainer.clear();
 		}
 		currstate = Idle;
 		break;
