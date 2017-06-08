@@ -115,7 +115,7 @@ void gameLoop::run()
 		handleEvents();
 		if (delta > frame)
 		{
-			logic(frame);
+			logic(delta);
 			TEST1D.update(delta);
 			TEST2D.update(delta);
 			TEST3D.update(delta);

@@ -144,7 +144,6 @@ void MouseState::update(double delta)
 				//This line make units switch into the "moving" state
 				TempUnitContainer[i]->desiredpos.y = orderPosition.y / 64;
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
-				TempUnitContainer[i]->pathfind(delta);
 			}
 		}
 		currstate = Idle;
