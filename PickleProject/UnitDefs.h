@@ -22,6 +22,9 @@ class Unit : public sf::Transformable
 {
 	
 public:
+	//Number of pathposition at which to move to
+	int pathPositionIterations = 0;
+	void pathfind(double delta);
 	UnitDependencies::UnitStates currstate;
 	Unit();
 	TileDependencies::tileType availabletyles;
@@ -40,9 +43,11 @@ public:
 	//Don't use positionfloat when dealing with game map lists
 	sf::Vector2f positionfloat;
 	sf::Vector2f desiredpos;
+	std::vector<sf::Vector2f> pathPositions;
 	int IridiumCost;
 	int KaskanCost;
 	void CustomMove(double delta);
+	bool CustomMovePathfinding(double delta, sf::Vector2f*startingPoint,sf::Vector2f* position);
 	void render(sf::RenderWindow* wind);
     void update(double delta);
 	void turn(double delta);
