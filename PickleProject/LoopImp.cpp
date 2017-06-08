@@ -3,6 +3,7 @@
 #include<iostream>
 void gameLoop::Initialize()
 {
+	exit(0);
 	//windowsetup
 	wind.create(sf::VideoMode(100, 100), "Project Pickle", sf::Style::Fullscreen);
 	wind.setMouseCursorVisible(false);
