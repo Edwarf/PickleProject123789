@@ -6,7 +6,6 @@ void gameLoop::Initialize()
 	//windowsetup
 	wind.create(sf::VideoMode(100, 100), "Project Pickle", sf::Style::Fullscreen);
 	wind.setMouseCursorVisible(false);
-	wind.setFramerateLimit(60);
 	//End of window setup
 	//map setup
 	gamemap.create(1000, 1000);
@@ -79,12 +78,36 @@ void gameLoop::handleEvents()
 			{
 				cam.currstate = cam.ScrollingRight;
 			}
+
 		}
 		else if (ev.type == sf::Event::KeyReleased)
 		{
+
 			if (ev.key.code == sf::Keyboard::A || ev.key.code == sf::Keyboard::S || ev.key.code == sf::Keyboard::W || ev.key.code == sf::Keyboard::D)
 			{
 				cam.currstate = cam.Idle;
+			}
+			//PUT ALL NON-CONTROLGROUPABLE KEYS BEFORE THIS POINT. THESE IF STATEMENTS INITIALIZE A CONTROL GROUP. PUTTING NON-CONTROLGROUPABLE KEYS HERE WILL RESULT IN A CONFLICT OF INTEREST
+			else if (ev.key.code == sf::Keyboard::LControl)
+			{
+				mouse.currstate = MouseState::ReadyingControlGroup;
+			}
+			else if (mouse.currstate == MouseState::ReadyingControlGroup)
+			{
+				mouse.currstate = MouseState::CreatingControlGroup;
+				mouse.currControlGroupKey = ev.key.code;
+			}
+			else
+			{
+				//This should almost always be last. Only move if you truly want controlgroupkeys to be processed before something
+				for (int i = 0; i < mouse.controlgroups.size(); i++)
+				{
+					if (mouse.controlgroups[i].sig == ev.key.code)
+					{
+						mouse.currControlGroupKey = ev.key.code;
+						mouse.currstate = MouseState::SelectingControlGroup;
+					}
+				}
 			}
 		}
 	}
@@ -104,10 +127,14 @@ void gameLoop::render()
 }
 void gameLoop::run()
 {
-	LeopardTank TEST1D(&Depend.LeopardTex, sf::Vector2f(0, 0), &gamemap);
-	LeopardTank TEST2D(&Depend.LeopardTex, sf::Vector2f(1, 1), &gamemap);
-	LeopardTank TEST3D(&Depend.LeopardTex, sf::Vector2f(2, 2), &gamemap);
-	LeopardTank TEST4D(&Depend.LeopardTex, sf::Vector2f(3, 3), &gamemap);
+	T1BasicFighter TEST1D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
+		100, 100, 1000, 1, 60, sf::Vector2f(1,1), &Depend.LeopardTex);
+	T1BasicFighter TEST2D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
+		100, 100, 1000, 1, 60, sf::Vector2f(1, 1), &Depend.LeopardTex);
+	T1BasicFighter TEST3D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
+		100, 100, 1000, 1, 60, sf::Vector2f(1, 1), &Depend.LeopardTex);
+	T1BasicFighter TEST4D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
+		100, 100, 1000, 1, 60, sf::Vector2f(1, 1), &Depend.LeopardTex);
 	double frame = (1.0 / 60.0);
 	sf::Clock gametime;
 	while (wind.isOpen())
@@ -116,7 +143,7 @@ void gameLoop::run()
 		handleEvents();
 		if (delta > frame)
 		{
-			logic(frame);
+			logic(delta);
 			TEST1D.update(delta);
 			TEST2D.update(delta);
 			TEST3D.update(delta);

@@ -2,6 +2,11 @@
 #include"ObjStates.h"
 #include"UnitDefs.h"
 #include<iostream>
+ControlKey::ControlKey(sf::Keyboard::Key k, std::vector<Unit*> un)
+{
+	sig = k;
+	associatedUnits = un;
+}
 cursor::cursor()
 {
 
@@ -57,17 +62,17 @@ void MouseState::update(double delta)
 		//sets up initial rectangle position
 		selectRect.setPosition(initPosition.x, initPosition.y);
 	}
+	//If the left mouse button goes up then this code is executed.
 	else if (LeftButtonDown == false && LastLeftButtonDown == true)
 	{
+		TempUnitContainer.clear();
 		LastLeftButtonDown = false;
 		currstate = Idle;
 		//THE IF/ELSEIF BELOW REORIENT THE ORIGIN OF THE RECTANGLE TO THE TOP LEFT. DON'T EDIT(ITS FUCKING WEIRD) IF YOU DON'T WANT TO CHANGE RECT BEHAVIOR. 
-
 		if (std::sqrt(std::pow((Position.x - initPosition.x), 2)) / (Position.x - initPosition.x) == -1)
 		{
 			if (std::sqrt(std::pow((Position.y - initPosition.y), 2)) / (Position.y - initPosition.y) == 1)
 			{
-
 				initPosition.x = initPosition.x + selectRect.getSize().x;
 				selectRect.setSize(sf::Vector2f(selectRect.getSize().x*-1, selectRect.getSize().y));
 			}
@@ -90,7 +95,6 @@ void MouseState::update(double delta)
 				selectRect.setSize(sf::Vector2f(selectRect.getSize().x, selectRect.getSize().y*-1));
 			}
 		}
-
 		TempUnitContainer = gamemap->retrieveUnits(std::round(initPosition.x / 64), std::round(initPosition.y / 64), std::round(selectRect.getSize().x / 64), std::round(selectRect.getSize().y / 64));
 		selectRect.setSize(sf::Vector2f(0, 0));
 		curs.sleep = false;
@@ -122,33 +126,58 @@ void MouseState::update(double delta)
 			curs.visual.setPosition(MousePosScrolling);
 			moved = false;
 		}			
-		else
-		{
-			
-		}
-			//type changing
+		//type changing
 		break;
 	case GivingOrder:
 		//Unit Interaction
-		std::vector<Unit*> tempUnitCont = gamemap->retrieveUnits(orderPosition.x / 64, orderPosition.y / 64, 1, 1);
-		if (tempUnitCont.size() > 0)
-		{
-			if (tempUnitCont[0] != nullptr)
-			{
-				//Fill with code for attacking or interacting with unit
-			}
-		}
+		//std::vector<Unit*> tempUnitCont = gamemap->retrieveUnits(orderPosition.x / 64, orderPosition.y / 64, 1, 1);
+		//if (tempUnitCont.size() > 0)
+		//{
+		//	if (tempUnitCont[0] != nullptr)
+		//	{
+		//		//Fill with code for attacking or interacting with unit
+		//	}
+		//}
 		//Movement
-		else if(TempUnitContainer.size() > 0);
+		 if(TempUnitContainer.size() > 0);
 		{		
 			//this code simply moves
 			for (int i = 0; i < TempUnitContainer.size(); i++)
 			{
 				//implicit conversion to float done here. This provides the point to which units will move
 				TempUnitContainer[i]->desiredpos.x = orderPosition.x / 64;
-				TempUnitContainer[i]->desiredpos.y = orderPosition.y / 64;
 				//This line make units switch into the "moving" state
+				TempUnitContainer[i]->desiredpos.y = orderPosition.y / 64;
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
+			}
+		}
+		currstate = Idle;
+		break;
+		//If this is called, the currControlGroupKey has been reset from the outside 
+	case CreatingControlGroup:
+		for (int i = 0; i < controlgroups.size(); i++)
+		{
+			//If a control group with the sig provided has already been created, this will simply allocate the selected units to the previously created control group and exit the function
+			if (controlgroups[i].sig == currControlGroupKey)
+			{
+				controlgroups[i].associatedUnits = TempUnitContainer;
+				currstate = Idle;
+				break;
+			}
+		}
+		currstate = Idle;
+		//If not, a control group will be created
+		controlgroups.push_back(ControlKey(currControlGroupKey, TempUnitContainer));
+		break;
+	case SelectingControlGroup:
+		for (int i = 0; i < controlgroups.size(); i++)
+		{
+			//If a control group with the sig provided has already been created, this will simply allocate the selected units to the previously created control group and exit the function
+			if (controlgroups[i].sig == currControlGroupKey)
+			{
+				currstate = Idle;
+				TempUnitContainer = controlgroups[i].associatedUnits;
+				break;
 			}
 		}
 		currstate = Idle;
