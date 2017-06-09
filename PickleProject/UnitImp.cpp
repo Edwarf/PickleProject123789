@@ -85,6 +85,8 @@ void Unit::update(double delta)
 		else
 		{
 			currstate = laststate;
+			desiredpos = last_desired_pos;
+			last_desired_pos = desiredpos;
 			laststate = UnitDependencies::REPOSITIONING;
 		}
 		break;
@@ -101,7 +103,7 @@ void Unit::render(sf::RenderWindow* wind)
 }
 void Unit::readjustDesiredPos(double delta)
 {
-	while (std::round(gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currunit != nullptr || gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].type != availabletyles))
+	while (gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currunit != nullptr ||  gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currbuilding != nullptr || gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].type != availabletyles)
 	{
 		desiredpos.x++;
 	}
@@ -111,7 +113,6 @@ std::vector<sf::Vector2f> Unit::pathCheck(double delta)
 {
 	//Value for checking units
 	int predictVal = 1;
-	readjustDesiredPos(delta);
 	std::vector<sf::Vector2f> returner;
 	//Simulating movement
 	sf::Vector2f updiagnolleft(positionfloat.x - 5, positionfloat.y + 5);
@@ -187,6 +188,7 @@ std::vector<sf::Vector2f> Unit::pathCheck(double delta)
 }
 void Unit::CustomMove(double delta)
 {
+	readjustDesiredPos(delta);
 	//void the previous tile
 	gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = nullptr;
 	//Normalizes the difference between vectors
@@ -194,7 +196,17 @@ void Unit::CustomMove(double delta)
 	sf::Vector2f MoveInterval(direction.x*Speed*delta, direction.y*Speed*delta);
 	positionfloat += MoveInterval;
 	//Sets unit on map
-	if (gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit != nullptr)
+	if (gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currbuilding != nullptr)
+	{
+		//provisional fix
+		positionfloat -= MoveInterval;
+	}
+	else if (gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].type != availabletyles)
+	{
+		//provisional fix
+		positionfloat -= MoveInterval;
+	}
+	else if (gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit != nullptr)
 	{
 		gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit->currstate = UnitDependencies::REPOSITIONING;
 		gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit->last_desired_pos = gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit->desiredpos;
@@ -219,23 +231,37 @@ void Unit::turn(double delta)
 	sf::Vector3f linedist(std::sqrt(std::pow(desiredpos.x - positionfloat.x, 2)), std::sqrt(std::pow(desiredpos.y - positionfloat.y, 2)), std::sqrt(std::pow(desiredpos.x - positionfloat.x, 2) + std::pow(desiredpos.y - positionfloat.y, 2)));
 	double currentAngle = visual.getRotation();
 	double targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, desiredpos.x - positionfloat.x))) - 90;
+	double realAngle = targetAngle - currentAngle;
+	visual.rotate(realAngle);
+	/*
+	//DO NOT EDIT THIS SHIT WE DONT KNOW HOW IT WORKS DONT TRY YOU MIGHT UNLOCK THE DEVIL FROM HELL
 	if (targetAngle > 0)
 	{
 		targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, (desiredpos.x - positionfloat.x)*-1))) - 90;
-		visual.rotate(((targetAngle*-1 - currentAngle)*delta * 5));
+		realAngle = (((targetAngle*-1 - currentAngle)*delta * 5));
 		targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, desiredpos.x - positionfloat.x))) - 90;
 	}
-	if (targetAngle < -90) {
+	if (targetAngle < -90) 
+	{
 		targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, (desiredpos.x - positionfloat.x)*-1))) - 90;
-		visual.rotate(((targetAngle*-1 - currentAngle)*delta * 5));
+		realAngle = (((targetAngle*-1 - currentAngle)*delta * 5));
 		targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, desiredpos.x - positionfloat.x))) - 90;
 	}
 	if ((targetAngle < 0) && (targetAngle > -90))
 	{
 		targetAngle = ((-180 / 3.14)*(std::atan2((desiredpos.y - positionfloat.y), (desiredpos.x - positionfloat.x)))) - 270;
-		visual.rotate(((targetAngle*-1 - currentAngle)*delta * 5));
+		realAngle = (((targetAngle*-1 - currentAngle)*delta * 5));
 		targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, desiredpos.x - positionfloat.x))) - 90;
 	}
+	double checkingAngle = (visual.getRotation()) - (targetAngle + 360);
+	std::cout << realAngle << std::endl;
+	if (checkingAngle  )
+	{
+	}
+	visual.rotate(realAngle);
+	double normalAngle = visual.getRotation();
+	*/
+
 }
 LandUnit::LandUnit()
 
@@ -245,63 +271,42 @@ LandUnit::LandUnit()
 
 }
 
-BasicFighter::BasicFighter()
-
+T1BasicFighter::T1BasicFighter(UnitDependencies::UnitType typeC,
+	UnitDependencies::UnitFaction factionC,
+	TileDependencies::tileType availabletylesC,
+	//Returns all available tile directions
+	map* gamemapC,
+	UnitDependencies::AttackType atktypeC,
+	double HPC,
+	int IridiumCostC,
+	int KaskanCostC,
+	double ArmorC,
+	double SpeedC,
+	sf::Vector2f currentPosition,
+	sf::Texture* tex)
 {
+	type = typeC;
+	faction = factionC;
+	availabletyles = availabletylesC;
+	gamemap = gamemapC;
+	atktype = atktypeC;
+	Armor = ArmorC;
+	Speed = SpeedC;
+	positionfloat = currentPosition;
 
-
-
-}
-
-LeopardTank::LeopardTank(sf::Texture* tex, sf::Vector2f poss, map* currmaps)
-
-{
-
-	visual.setOrigin(32, 32);
-
-	gamemap = currmaps;
-
-	availabletyles = TileDependencies::Flatland;
-
-	atktype = Physical;
-
-	HP = 500;
-
-	Armor = 1;
-
-	//60 speed = 1 second of real time 
-
-	Speed = 1;
-
-	IridiumCost = 100;
-
-	KaskanCost = 100;
-
-	range = 4;
-
-	//Half a second per attack
-
-	RoF = .5;
-
-	positionfloat = poss;
-
-	visual.setTexture((*tex));
-
+	//to obtain a certain unit size, simply divide the size by localbounds to get a ratio that you can put in scale
+	currstate = UnitDependencies::IDLE;
+	laststate = currstate;
+	visual.setTexture(*tex);
 	visual.setPosition(positionfloat.x * 64, positionfloat.y * 64);
-
-	//to obtain a certain unit size, simply devide the size by localbounds to get a ratio that you can put in scale
-
 	visual.setScale(64 / visual.getLocalBounds().width, 64 / visual.getLocalBounds().height);
-
 	visual.setColor(sf::Color::Red);
-
 	gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
-
 	gamemap->mapunits.push_back(this);
 
 }
 
-void LeopardTank::interact()
+void T1BasicFighter::interact()
 
 {
 

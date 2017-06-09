@@ -148,8 +148,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BuildingDefs.h" />
     <ClInclude Include="CameraDefs.h" />
     <ClInclude Include="EventDefs.h" />
+    <ClInclude Include="GUIDefs.h" />
     <ClInclude Include="LoopDefs.h" />
     <ClInclude Include="MapDefs.h" />
     <ClInclude Include="ObjStates.h" />
@@ -159,7 +161,9 @@
     <ClInclude Include="UnitDefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BuildingImp.cpp" />
     <ClCompile Include="CameraImp.cpp" />
+    <ClCompile Include="GUIImp.cpp" />
     <ClCompile Include="LoopImp.cpp" />
     <ClCompile Include="MapImp.cpp" />
     <ClCompile Include="ObjStates.cpp" />

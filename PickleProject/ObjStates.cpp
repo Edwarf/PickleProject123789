@@ -2,6 +2,11 @@
 #include"ObjStates.h"
 #include"UnitDefs.h"
 #include<iostream>
+ControlKey::ControlKey(sf::Keyboard::Key k, std::vector<Unit*> un)
+{
+	sig = k;
+	associatedUnits = un;
+}
 cursor::cursor()
 {
 
@@ -125,16 +130,16 @@ void MouseState::update(double delta)
 		break;
 	case GivingOrder:
 		//Unit Interaction
-		std::vector<Unit*> tempUnitCont = gamemap->retrieveUnits(orderPosition.x / 64, orderPosition.y / 64, 1, 1);
-		if (tempUnitCont.size() > 0)
-		{
-			if (tempUnitCont[0] != nullptr)
-			{
-				//Fill with code for attacking or interacting with unit
-			}
-		}
+		//std::vector<Unit*> tempUnitCont = gamemap->retrieveUnits(orderPosition.x / 64, orderPosition.y / 64, 1, 1);
+		//if (tempUnitCont.size() > 0)
+		//{
+		//	if (tempUnitCont[0] != nullptr)
+		//	{
+		//		//Fill with code for attacking or interacting with unit
+		//	}
+		//}
 		//Movement
-		else if(TempUnitContainer.size() > 0);
+		 if(TempUnitContainer.size() > 0);
 		{		
 			//this code simply moves
 			for (int i = 0; i < TempUnitContainer.size(); i++)
@@ -144,6 +149,35 @@ void MouseState::update(double delta)
 				//This line make units switch into the "moving" state
 				TempUnitContainer[i]->desiredpos.y = orderPosition.y / 64;
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
+			}
+		}
+		currstate = Idle;
+		break;
+		//If this is called, the currControlGroupKey has been reset from the outside 
+	case CreatingControlGroup:
+		for (int i = 0; i < controlgroups.size(); i++)
+		{
+			//If a control group with the sig provided has already been created, this will simply allocate the selected units to the previously created control group and exit the function
+			if (controlgroups[i].sig == currControlGroupKey)
+			{
+				controlgroups[i].associatedUnits = TempUnitContainer;
+				currstate = Idle;
+				break;
+			}
+		}
+		currstate = Idle;
+		//If not, a control group will be created
+		controlgroups.push_back(ControlKey(currControlGroupKey, TempUnitContainer));
+		break;
+	case SelectingControlGroup:
+		for (int i = 0; i < controlgroups.size(); i++)
+		{
+			//If a control group with the sig provided has already been created, this will simply allocate the selected units to the previously created control group and exit the function
+			if (controlgroups[i].sig == currControlGroupKey)
+			{
+				currstate = Idle;
+				TempUnitContainer = controlgroups[i].associatedUnits;
+				break;
 			}
 		}
 		currstate = Idle;

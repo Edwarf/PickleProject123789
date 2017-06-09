@@ -1,6 +1,7 @@
 #pragma once
 #include<SFML\Graphics.hpp>
 #include<vector>
+class Building;
 class Unit;
 class TileDependencies
 {
@@ -18,6 +19,7 @@ public:
 class tile
 {
 public:
+	Building* currbuilding = nullptr;
 	Unit* currunit = nullptr;
 	bool occupied;
 	TileDependencies::tileType type;
