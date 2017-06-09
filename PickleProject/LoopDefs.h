@@ -14,6 +14,7 @@ public:
 	Camera cam;
 	sf::RenderWindow wind;
 	MouseState mouse;
+	//Deprecated
 	std::vector<sf::Event> EventStack;
 	void Initialize();
 	void handleEvents();

@@ -1,6 +1,7 @@
 #pragma once
 #include<SFML\Graphics.hpp>
 #include"MapDefs.h"
+#include"UnitDefs.h"
 class cursor
 {
 public:

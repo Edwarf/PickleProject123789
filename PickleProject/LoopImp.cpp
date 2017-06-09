@@ -6,7 +6,6 @@ void gameLoop::Initialize()
 	//windowsetup
 	wind.create(sf::VideoMode(100, 100), "Project Pickle", sf::Style::Fullscreen);
 	wind.setMouseCursorVisible(false);
-	wind.setFramerateLimit(60);
 	//End of window setup
 	//map setup
 	gamemap.create(1000, 1000);
@@ -116,7 +115,7 @@ void gameLoop::run()
 		handleEvents();
 		if (delta > frame)
 		{
-			logic(frame);
+			logic(delta);
 			TEST1D.update(delta);
 			TEST2D.update(delta);
 			TEST3D.update(delta);
