@@ -30,10 +30,9 @@ public:
 	{
 
 		IDLE,
-
 		MOVING,
-
 		ATTACKING,
+		REPOSITIONING,
 
 	};
 
@@ -60,12 +59,14 @@ class Unit : public sf::Transformable
 public:
 
 	UnitDependencies::UnitStates currstate;
+	UnitDependencies::UnitStates laststate;
 
 	Unit();
 
 	TileDependencies::tileType availabletyles;
 	//Returns all available tile directions
-	std::vector<UnitDependencies::TileDirection> pathCheck(double delta);
+	std::vector<sf::Vector2f> pathCheck(double delta);
+	void readjustDesiredPos(double delta);
 	map* gamemap;
 
 	enum AttackType
@@ -89,7 +90,7 @@ public:
 	double Speed;
 
 	sf::Sprite visual;
-
+	sf::Vector2f LastMoveInterval;
 	//Don't use positionfloat when dealing with game map lists
 
 	sf::Vector2f positionfloat;
@@ -107,6 +108,7 @@ public:
 	void update(double delta);
 
 	void turn(double delta);
+	sf::Vector2f last_desired_pos;
 
 };
 

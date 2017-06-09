@@ -103,10 +103,10 @@ void gameLoop::render()
 }
 void gameLoop::run()
 {
-	LeopardTank TEST1D(&Depend.LeopardTex, sf::Vector2f(0, 0), &gamemap);
-	LeopardTank TEST2D(&Depend.LeopardTex, sf::Vector2f(1, 1), &gamemap);
-	LeopardTank TEST3D(&Depend.LeopardTex, sf::Vector2f(2, 2), &gamemap);
-	LeopardTank TEST4D(&Depend.LeopardTex, sf::Vector2f(3, 3), &gamemap);
+	LeopardTank TEST1D(&Depend.LeopardTex, sf::Vector2f(3, 3), &gamemap);
+	LeopardTank TEST2D(&Depend.LeopardTex, sf::Vector2f(5, 5), &gamemap);
+	LeopardTank TEST3D(&Depend.LeopardTex, sf::Vector2f(7, 7), &gamemap);
+	LeopardTank TEST4D(&Depend.LeopardTex, sf::Vector2f(9, 9), &gamemap);
 	double frame = (1.0 / 60.0);
 	sf::Clock gametime;
 	while (wind.isOpen())
