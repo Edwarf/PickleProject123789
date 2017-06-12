@@ -42,13 +42,19 @@
     <ClInclude Include="UnitDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UIElementDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BuildingDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GUIDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UIElementDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectDependencyDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TeamDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,10 +80,16 @@
     <ClCompile Include="CameraImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GUIImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="BuildingImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GUIImp.cpp">
+    <ClCompile Include="ObjectDependencyImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TeamImp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

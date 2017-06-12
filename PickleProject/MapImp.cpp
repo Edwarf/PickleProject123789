@@ -2,37 +2,52 @@
 #include"MapDefs.h"
 #include"UnitDefs.h"
 #include<iostream>
-TileDependencies::TileDependencies()
-{
-	if (!grasstex.loadFromFile(("GoldenRocks.png"), sf::IntRect(0,0,64,64)));
-	{		
-		std::cout << "Error, could not load image.";
-	}
-}
+#include"ObjectDependencyDefs.h"
 tile::tile(sf::Texture* tex, sf::Vector2f newpos, TileDependencies::tileType tp)
 {
 	pos = newpos;
 	visual.setTexture((*tex));
 	visual.setPosition(newpos.x, newpos.y);
 	type = tp;
+	origColor = visual.getColor();
+	visual.setColor(sf::Color(255, 255, 255, 100));
+	resetColor = sf::Color(255, 255, 255, 100);
 }
-void tile::update(sf::Time delta)
+void tile::update(double delta)
 {
-
+	switch (currstate)
+	{
+	case TileDependencies::TileState::IDLE:
+		visual.setColor(sf::Color(255, 255, 255, 100));
+		resetColor = sf::Color(255, 255, 255, 100);
+		break;
+	case TileDependencies::TileState::VISIBLE:
+		visual.setColor(origColor);
+		currstate = TileDependencies::TileState::REVEALED;
+		//sets reset color to IDLE's color
+		resetColor = sf::Color(255, 255, 255, 100);
+		break;
+	}
+	currTeamsSeeing.clear();
 }
 void tile::render(sf::RenderWindow* wind)
 {
 	wind->draw(visual);
+	visual.setColor(resetColor);
 }
-map::map(int height, int width)
+map::map(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, sf::RenderWindow* win)
 {
+	unitdep = unitdepC;
+	tiledep = tiledepC;
+	buildingdep = buildingdepC;
+	guidep = guidepC;
 	sf::Vector2f vec(0, 0);
 	std::vector<tile> temp;
 	for (int i = 0; i < width; i++)
 	{
 		for (int z = 0; z < height; z++)
 		{
-			temp.push_back(tile(&Dependencies.grasstex, vec, TileDependencies::tileType::Flatland));
+			temp.push_back(tile(&Dependencies.GoldenRocksTex, vec, TileDependencies::tileType::Flatland));
 			vec.y += 64;
 		}
 		vec.y = 0;
@@ -40,22 +55,34 @@ map::map(int height, int width)
 		temp.clear();
 		vec.x += 64;
 	}
+	for (int i = 0; i < numberOfTeams; i++)
+	{
+		teams.push_back(Team(unitdep, tiledep, buildingdep, guidep, this, i, win));
+	}
 }
-void map::create(int height, int width)
+void map::create(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, sf::RenderWindow* win)
 {
+	unitdep = unitdepC;
+	tiledep = tiledepC;
+	buildingdep = buildingdepC;
+	guidep = guidepC;
 	sf::Vector2f vec(0, 0);
 	std::vector<tile> temp;
 	for (int i = 0; i < width; i++)
 	{
 		for (int z = 0; z < height; z++)
 		{
-			temp.push_back(tile(&Dependencies.grasstex, vec, TileDependencies::tileType::Flatland));
+			temp.push_back(tile(&Dependencies.GoldenRocksTex, vec, TileDependencies::tileType::Flatland));
 			vec.y += 64;
 		}
 		vec.y = 0;
 		tilegrid.push_back(temp);
 		temp.clear();
 		vec.x += 64;
+	}
+	for (int i = 0; i < numberOfTeams; i++)
+	{
+		teams.push_back(Team(unitdep, tiledep, buildingdep, guidep, this, i, win));
 	}
 }
 map::map()
@@ -64,10 +91,16 @@ map::map()
 }
 void map::update(double delta)
 {
-	for (int i = 0; i < mapunits.size(); i++)
+	for (int i = 0; i < teams.size(); i++)
 	{
-		//does not deal with unit cleanup, units themselves must erase their position
+		teams[i].update(delta);
 	}
+	for (auto i : tileUpdates)
+	{
+		i->update(delta);
+	}
+	tileUpdates.clear();
+
 }
 void map::render(sf::RenderWindow* window)
 {
@@ -78,6 +111,10 @@ void map::render(sf::RenderWindow* window)
 			tilegrid[i][z].render(window);
 		}
 	}
+	for (int i = 0; i < teams.size(); i++)
+	{
+		teams[i].render(window);
+	}
 }
 void map::renderpart(sf::RenderWindow* window, int x, int y, int width, int height)
 {
@@ -87,6 +124,10 @@ void map::renderpart(sf::RenderWindow* window, int x, int y, int width, int heig
 		{
 			tilegrid[i][z].render(window);
 		}
+	}
+	for (int i = 0; i < teams.size(); i++)
+	{
+		teams[i].render(window);
 	}
 }
 std::vector<Unit*> map::retrieveUnits(int x, int y, int height, int width)
@@ -126,6 +167,46 @@ std::vector<Unit*> map::retrieveUnits(int x, int y, int height, int width)
 					returner.push_back(tilegrid[i][z].currunit);
 				}
 			}
+		}
+	}
+	return returner;
+}
+std::vector<tile*> map::returnMapSquare(int x, int y, int height, int width)
+{
+
+	std::vector<tile*> returner;
+	int widthx = width + x;
+	int heighty = height + y;
+	if (x < 0)
+	{
+		x = 1;
+	}
+	if (y < 0)
+	{
+		y = 1;
+	}
+	if (x > tilegrid.size())
+	{
+		x = tilegrid.size() - 1;
+	}
+	if (y > tilegrid[0].size())
+	{
+		y = tilegrid[0].size() - 1;
+	}
+	if (widthx > tilegrid.size())
+	{
+		widthx = tilegrid.size() - 1;
+	}
+	if (heighty > tilegrid[0].size())
+	{
+		heighty = tilegrid[0].size() - 1;
+	}
+	for (int i = x; i <= widthx; i++)
+	{
+		for (int z = y; z <= heighty; z++)
+		{
+			returner.push_back(&tilegrid[i][z]);
+			tileUpdates.insert(&tilegrid[i][z]);
 		}
 	}
 	return returner;

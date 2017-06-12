@@ -2,63 +2,12 @@
 #pragma once
 
 #include<SFML\Graphics.hpp>
-
+#include"ObjectDependencyDefs.h"
 #include"MapDefs.h"
-
+#include"GUIDefs.h"
 sf::Vector2f normalize(const sf::Vector2f& source);
 
-class UnitDependencies
-
-{
-
-public:
-	enum AttackType
-
-	{
-
-		None,
-
-		Physical,
-
-		Laser,
-
-	};
-	enum TileDirection
-	{
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT,
-		UPDIAGNOLRIGHT,
-		UPDIAGNOLLEFT,
-		DOWNDIAGNOLRIGHT,
-		DOWNDIAGNOLLEFT,
-		//Stationary denotes to the same tile 
-		STATIONARY
-	};
-	enum UnitStates
-	{
-		IDLE,
-		MOVING,
-		ATTACKING,
-		REPOSITIONING,
-	};
-	enum UnitFaction
-	{
-		Modern
-	};
-	//Associates itself with a defined class
-	enum UnitType
-	{
-		LeopardTank,
-
-
-	};
-	sf::Texture LeopardTex;
-	UnitDependencies();
-};
 class Unit
-
 {
 public:
 	//Constructor Values
@@ -70,15 +19,20 @@ public:
 	UnitDependencies::UnitStates laststate;
 	Unit();
 	TileDependencies::tileType availabletyles;
+	//Present to implement amphibious units. If one terrain is desired set availabletyles2 to the value of availabletyles
+	TileDependencies::tileType availabletyles2;
 	//Returns all available tile directions
 	map* gamemap;
 	UnitDependencies::AttackType atktype;
-	double HP;
+	int HP;
 	int IridiumCost;
 	int KaskanCost;
-	double Armor;
-	double Speed;
+	int Armor;
+	int Speed;
 	sf::Vector2f positionfloat;
+	Collection UnitUI;
+	//Radius is in tiles, converted to pixles in constructor
+	int visionSideSize;
 
 	//Internal Values
 	sf::Sprite visual;
@@ -90,9 +44,11 @@ public:
 	void render(sf::RenderWindow* wind);
 	void update(double delta);
 	void turn(double delta);
+	void provideVision(double delta);
 	sf::Vector2f last_desired_pos;
 	void readjustDesiredPos(double delta);
-
+	void DefaultUISetup(GUIDependencies*, sf::RenderWindow* wind);
+	virtual void performAction(double delta) = 0;
 };
 class LandUnit : public Unit
 
@@ -100,39 +56,71 @@ class LandUnit : public Unit
 
 public:
 	int range;
-	int Rof;
+	double Rof;
 	LandUnit();
-
 	//usually attacks if on other unit, moves if not
-
-	virtual void interact() = 0;
-
 };
-class T1BasicFighter : public LandUnit
+class Engineer
+{
+	double productionSpeed;
+	double origProductionSpeed;
+};
+//In t1engineers, RoF is 
+class T1Engineer : public Engineer
+{
+	void performAction(double delta);
+	void construct(double delta);
+	T1Engineer(UnitDependencies::UnitType typeC,
+		UnitDependencies::UnitFaction factionC,
+		TileDependencies::tileType availabletylesC,
+		//Returns all available tile directions
+		map* gamemapC,
+		UnitDependencies::AttackType atktypeC,
+		const int HPC,
+		const int IridiumCostC,
+		const int KaskanCostC,
+		const int ArmorC,
+		int SpeedC,
+		sf::Vector2f currentPosition,
+		sf::Texture* tex,
+		GUIDependencies* GUIDep,
+		sf::RenderWindow* wind,
+		const int visionRadiusC,
+		const int rangeC,
+		double productionSpeedC,
+		double origProductionSpeedC
+	);
+};
+class CombatUnit : public LandUnit
+{
+public:
+	double damage;
+};
+class T1BasicFighter : public CombatUnit
 
 {
-
 public:
+	void performAction(double delta);
 	//Constructor Values
-
-
-	void interact();
-
 	T1BasicFighter(UnitDependencies::UnitType typeC,
 	UnitDependencies::UnitFaction factionC,
 	TileDependencies::tileType availabletylesC,
 	//Returns all available tile directions
 	map* gamemapC,
 	UnitDependencies::AttackType atktypeC,
-	double HPC,
+	int HPC,
 	int IridiumCostC,
 	int KaskanCostC,
-	double ArmorC,
-	double SpeedC,
+	const int ArmorC,
+	int SpeedC,
 	sf::Vector2f currentPosition,
-	sf::Texture* tex);
-
+	sf::Texture* tex,
+	GUIDependencies* GUIDep,
+	sf::RenderWindow* wind,
+	int visionRadiusC,
+	int rangeC,
+	double RofC,
+	double damageC
+	);
 };
-
-
 //BASIC FIGHTER, T1 

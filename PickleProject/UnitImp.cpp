@@ -10,25 +10,10 @@
 #include<algorithm>
 
 #include"MapDefs.h"
-
-UnitDependencies::UnitDependencies()
-
-{
-
-	if (!LeopardTex.loadFromFile(("LeopardTank.png")));
-
-	{
-
-		std::cout << "Error, could not load image.";
-
-	}
-
-}
+#include"GUIDefs.h"
 
 sf::Vector2f normalize(const sf::Vector2f& source)
-
 {
-
 	//Square root of the squares of x and y to obtain length
 
 	float length = std::sqrt((source.x * source.x) + (source.y * source.y));
@@ -46,7 +31,6 @@ sf::Vector2f normalize(const sf::Vector2f& source)
 }
 
 Unit::Unit()
-
 {
 
 
@@ -54,27 +38,20 @@ Unit::Unit()
 }
 
 void Unit::update(double delta)
-
 {
-
 	switch (currstate)
-
 	{
-
 	case UnitDependencies::MOVING:
 		laststate = UnitDependencies::MOVING;
 		if (std::round(desiredpos.x) != std::round(positionfloat.x) || std::round(desiredpos.y) != std::round(positionfloat.y))
 		{
 			CustomMove(delta);
-
 		}
 		else
 		{
-
 			currstate = UnitDependencies::IDLE;
 			gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
 		}
-
 		break;
 		//desiredpos should be changed from OUTSIDE this case. We reset desiredpos to last_desired_pos, which should have been set OUTSIDE of this case by the object attempting to change UnitDependency's state.
 	case UnitDependencies::REPOSITIONING:
@@ -84,13 +61,18 @@ void Unit::update(double delta)
 		}
 		else
 		{
+			laststate = UnitDependencies::REPOSITIONING;
 			currstate = laststate;
 			desiredpos = last_desired_pos;
 			last_desired_pos = desiredpos;
-			laststate = UnitDependencies::REPOSITIONING;
 		}
 		break;
+	case UnitDependencies::ATTACKING:
+		laststate = UnitDependencies::ATTACKING;
+		performAction(delta);
+		break;
 	}
+	provideVision(delta);
 
 }
 
@@ -103,7 +85,7 @@ void Unit::render(sf::RenderWindow* wind)
 }
 void Unit::readjustDesiredPos(double delta)
 {
-	while (gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currunit != nullptr ||  gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currbuilding != nullptr || gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].type != availabletyles)
+	while (gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currunit != nullptr ||  gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].currbuilding != nullptr || (gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].type != availabletyles && gamemap->tilegrid[std::round(desiredpos.x)][std::round(desiredpos.y)].type != availabletyles2))
 	{
 		desiredpos.x++;
 	}
@@ -201,7 +183,7 @@ void Unit::CustomMove(double delta)
 		//provisional fix
 		positionfloat -= MoveInterval;
 	}
-	else if (gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].type != availabletyles)
+	else if (gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].type != availabletyles && gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].type != availabletyles2)
 	{
 		//provisional fix
 		positionfloat -= MoveInterval;
@@ -215,26 +197,33 @@ void Unit::CustomMove(double delta)
 	gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
 	//Sets the position of the visual sprite
 	visual.setPosition(positionfloat.x * 64, positionfloat.y * 64);
+	//Sets the position of the vision circle
 	//Turns unit
 	turn(delta);
-	//Sets unit on map
+	//Provides Vision
 }
-
-
+void Unit::provideVision(double delta)
+{
+	std::vector<tile*> visiontiles = gamemap->returnMapSquare(positionfloat.x - visionSideSize / 2, positionfloat.y - visionSideSize / 2, visionSideSize, visionSideSize);
+	for (int i = 0; i < visiontiles.size(); i++)
+	{
+		visiontiles[i]->currstate = TileDependencies::TileState::VISIBLE;
+		visiontiles[i]->currTeamsSeeing.insert(team);
+	}
+}
 
 void Unit::turn(double delta)
 
 {
-
-	//See physical paper: Explanation of turn appearance
 
 	sf::Vector3f linedist(std::sqrt(std::pow(desiredpos.x - positionfloat.x, 2)), std::sqrt(std::pow(desiredpos.y - positionfloat.y, 2)), std::sqrt(std::pow(desiredpos.x - positionfloat.x, 2) + std::pow(desiredpos.y - positionfloat.y, 2)));
 	double currentAngle = visual.getRotation();
 	double targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, desiredpos.x - positionfloat.x))) - 90;
 	double realAngle = targetAngle - currentAngle;
 	visual.rotate(realAngle);
+
 	/*
-	//DO NOT EDIT THIS SHIT WE DONT KNOW HOW IT WORKS DONT TRY YOU MIGHT UNLOCK THE DEVIL FROM HELL
+
 	if (targetAngle > 0)
 	{
 		targetAngle = ((180 / 3.14)*(std::atan2(desiredpos.y - positionfloat.y, (desiredpos.x - positionfloat.x)*-1))) - 90;
@@ -263,6 +252,10 @@ void Unit::turn(double delta)
 	*/
 
 }
+void T1BasicFighter::performAction(double delta)
+{
+	exit(0);
+}
 LandUnit::LandUnit()
 
 {
@@ -270,29 +263,44 @@ LandUnit::LandUnit()
 
 
 }
-
+void Unit::DefaultUISetup(GUIDependencies* gui, sf::RenderWindow* wind)
+{
+	//never use 0 for x or y positions
+	UnitUI.values.push_back(new BackgroundElement(0,780, 1920,200, &gui->DefaultBackGroundGUITex, wind));
+}
 T1BasicFighter::T1BasicFighter(UnitDependencies::UnitType typeC,
 	UnitDependencies::UnitFaction factionC,
 	TileDependencies::tileType availabletylesC,
 	//Returns all available tile directions
 	map* gamemapC,
 	UnitDependencies::AttackType atktypeC,
-	double HPC,
+	int HPC,
 	int IridiumCostC,
 	int KaskanCostC,
-	double ArmorC,
-	double SpeedC,
+	int ArmorC,
+	int SpeedC,
 	sf::Vector2f currentPosition,
-	sf::Texture* tex)
+	sf::Texture* tex,
+	GUIDependencies* GUIDep,
+	sf::RenderWindow* wind,
+	int visionRadiusC,
+	int rangeC,
+	double RofC,
+	double damageC)
 {
 	type = typeC;
 	faction = factionC;
 	availabletyles = availabletylesC;
+	availabletyles2 = availabletyles;
 	gamemap = gamemapC;
 	atktype = atktypeC;
 	Armor = ArmorC;
 	Speed = SpeedC;
 	positionfloat = currentPosition;
+	visionSideSize = visionRadiusC;
+	Rof = RofC;
+	range = rangeC;
+	damage = damageC;
 
 	//to obtain a certain unit size, simply divide the size by localbounds to get a ratio that you can put in scale
 	currstate = UnitDependencies::IDLE;
@@ -301,16 +309,8 @@ T1BasicFighter::T1BasicFighter(UnitDependencies::UnitType typeC,
 	visual.setPosition(positionfloat.x * 64, positionfloat.y * 64);
 	visual.setScale(64 / visual.getLocalBounds().width, 64 / visual.getLocalBounds().height);
 	visual.setColor(sf::Color::Red);
+	visual.setOrigin(32, 32);
 	gamemap->tilegrid[std::round(positionfloat.x)][std::round(positionfloat.y)].currunit = this;
-	gamemap->mapunits.push_back(this);
-
-}
-
-void T1BasicFighter::interact()
-
-{
-
-
-
+	DefaultUISetup(GUIDep, wind);
 }
 

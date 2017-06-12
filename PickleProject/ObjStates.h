@@ -2,7 +2,7 @@
 #include<SFML\Graphics.hpp>
 #include"MapDefs.h"
 #include"UnitDefs.h"
-
+#include"GUIDefs.h"
 class cursor
 {
 public:
@@ -28,7 +28,7 @@ class MouseState
 {
 	cursor curs;
 	map* gamemap;
-
+	bool GUIUp = false;
 public:
 	enum state
 	{
@@ -38,7 +38,9 @@ public:
 		ReadyingControlGroup,
 		CreatingControlGroup,
 		SelectingControlGroup,
+		RenderingGUI,
 	};
+	state lastState = Idle;
 	std::vector<ControlKey> controlgroups;
 	//this variable is for collecting potential control group keys. Initialized to unkown key.   
 	sf::Keyboard::Key currControlGroupKey = sf::Keyboard::Key::Unknown;
@@ -61,4 +63,7 @@ public:
 	sf::RectangleShape selectRect;
 	void update(double delta);
 	void render(sf::RenderWindow* win);
+	Collection*currGU;
+	GUIDependencies gameGUIDependencies;
+	bool contains = false;
 };

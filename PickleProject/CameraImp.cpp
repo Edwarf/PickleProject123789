@@ -8,6 +8,7 @@ Camera::Camera(sf::Vector2f vec, map* currmap, int w, int h, sf::RenderWindow* w
 	currstate = Idle;
 	position = vec;
 	dispmap = currmap;
+	camview.setSize(w , h);
 	width = camview.getSize().x / 64;
 	height = camview.getSize().y / 64;
 	wind->setView(camview);
@@ -20,7 +21,7 @@ void Camera::CustomMove(sf::Vector2f desiredpos, double delta)
 		sf::Vector2f direction = normalize(desiredpos - position);
 		sf::Vector2f MoveInterval(direction.x*speed*delta, direction.y*speed*delta);
 		position += MoveInterval;
-		camview.reset(sf::FloatRect(position.x*64, position.y*64, wind->getSize().x, wind->getSize().y));
+		camview.reset(sf::FloatRect(position.x*64, position.y*64, width*64, height*64));
 		//type changing
 	}
 }
@@ -30,8 +31,12 @@ void Camera::create(sf::Vector2f vec, map* currmap, int w, int h, sf::RenderWind
 	position = vec;
 	dispmap = currmap;
 	currstate = Idle;
+	camview.setSize(w, h);
 	width = camview.getSize().x / 64;
 	height = camview.getSize().y / 64;
+	//The adjustment of one is made due to a rounding error :) 
+	camview.setCenter(position.x*64 + width*64/2 , (position.y+1)*64 + height*64/2);
+
 	wind->setView(camview);
 }
 void Camera::update(double delta)

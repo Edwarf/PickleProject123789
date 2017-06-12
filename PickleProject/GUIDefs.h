@@ -1,21 +1,15 @@
 #pragma once
 #include<vector>
-#include"UnitDefs.h"
-#include"BuildingDefs.h"
+#include<SFML\Graphics.hpp>
+#include"ObjectDependencyDefs.h"
 //GUI classes don't use the tile system and are not bound to tiles.
-class GUIDependencies
-{
-public:
-	enum ElementState
-	{
-		IDLE,
-		LEFTCLICKED,
-		RIGHTCLICKED,
-	};
-};
+class ProductionBuilding;
 class Element
 {
 public:
+	sf::RenderWindow* wind;
+	double x;
+	double y;
 	GUIDependencies::ElementState currstate = GUIDependencies::ElementState::IDLE;
 	sf::Sprite visual;
 	//Express width as a percentage of the screen in the constructor.
@@ -41,13 +35,33 @@ public:
 	void update(double delta);
 	void render(sf::RenderWindow* wind);
 };
+class TextElement : public Element
+{
+public:
+	sf::Text text;
+	TextElement(double XC, double YC, double WIDTHC, double HEIGHTC, int fontsize, sf::Font* currfont, sf::RenderWindow* wind);
+	void update(double delta);
+	void render(sf::RenderWindow* wind);
+};
+class BackgroundElement : public Element
+{
+public:
+	BackgroundElement(double XC, double YC, double WIDTHC, double HEIGHTC, sf::Texture* tex, sf::RenderWindow* wind);
+	void update(double delta);
+	void render(sf::RenderWindow* wind);
+};
 class Collection
 {
+public:
 	std::vector<Element*> values;
 	void update(double delta);
 	void render(sf::RenderWindow* wind);
 };
 class GUIManager
 {
+public:
 	std::vector<Collection> values;
+	Collection* currcollec;
+	void update(double delta);
+	void render(sf::RenderWindow* wind);
 };

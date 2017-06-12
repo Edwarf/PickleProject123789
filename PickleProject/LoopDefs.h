@@ -9,7 +9,9 @@
 class gameLoop
 {
 public:
-	UnitDependencies Depend;
+	TileDependencies TileDepend;
+	BuildingDependencies BuildingDepend;
+	UnitDependencies UnitDepend;
 	map gamemap;
 	Camera cam;
 	sf::RenderWindow wind;

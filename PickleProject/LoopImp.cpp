@@ -1,5 +1,6 @@
 #include"stdafx.h"
 #include"LoopDefs.h"
+#include"ObjectDependencyDefs.h"
 #include<iostream>
 void gameLoop::Initialize()
 {
@@ -8,13 +9,13 @@ void gameLoop::Initialize()
 	wind.setMouseCursorVisible(false);
 	//End of window setup
 	//map setup
-	gamemap.create(1000, 1000);
+	gamemap.create(1000, 1000, 1, &UnitDepend, &TileDepend, &BuildingDepend, &mouse.gameGUIDependencies, &wind);
 	//map end
 	//camera setup
 	sf::Vector2f centerCam(0,0);
 	centerCam.x = 0;
 	centerCam.y = 0;
-	cam.create(centerCam, &gamemap, wind.getSize().x, wind.getSize().y, &wind);
+	cam.create(centerCam, &gamemap, 1920, 1080, &wind);
 	wind.setView(cam.camview);
 	//End of camera setup
 	//Mouse setup
@@ -78,7 +79,6 @@ void gameLoop::handleEvents()
 			{
 				cam.currstate = cam.ScrollingRight;
 			}
-
 		}
 		else if (ev.type == sf::Event::KeyReleased)
 		{
@@ -116,25 +116,21 @@ void gameLoop::logic(double delta)
 {
 	cam.update(delta);
 	mouse.update(delta);
+	gamemap.update(delta);
 }
 void gameLoop::render()
 {
 	wind.clear();
 	cam.render();
-
+	mouse.render(&wind);
+	wind.setView(cam.camview);
+	wind.display();
 	
 	//draw shit here 
 }
 void gameLoop::run()
 {
-	T1BasicFighter TEST1D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
-		100, 100, 1000, 1, 60, sf::Vector2f(1,1), &Depend.LeopardTex);
-	T1BasicFighter TEST2D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
-		100, 100, 1000, 1, 60, sf::Vector2f(1, 1), &Depend.LeopardTex);
-	T1BasicFighter TEST3D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
-		100, 100, 1000, 1, 60, sf::Vector2f(1, 1), &Depend.LeopardTex);
-	T1BasicFighter TEST4D(UnitDependencies::UnitType::LeopardTank, UnitDependencies::UnitFaction::Modern, TileDependencies::Flatland, &gamemap, UnitDependencies::AttackType::Physical,
-		100, 100, 1000, 1, 60, sf::Vector2f(1, 1), &Depend.LeopardTex);
+	
 	double frame = (1.0 / 60.0);
 	sf::Clock gametime;
 	while (wind.isOpen())
@@ -144,27 +140,11 @@ void gameLoop::run()
 		if (delta > frame)
 		{
 			logic(delta);
-			TEST1D.update(delta);
-			TEST2D.update(delta);
-			TEST3D.update(delta);
-			TEST4D.update(delta);
 		}
 		else
 		{
 			logic(delta);
-			TEST1D.update(delta);
-			TEST2D.update(delta);
-			TEST3D.update(delta);
-			TEST4D.update(delta);
 			render();
-			TEST1D.render(&wind);
-			TEST2D.render(&wind);
-			TEST3D.render(&wind);
-			TEST4D.render(&wind);
-			mouse.render(&wind);
-			wind.setView(cam.camview);
-			wind.display();
-
 		}
 	}
 }

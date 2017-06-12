@@ -51,24 +51,34 @@ void cursor::render(sf::RenderWindow* wind)
 
 void MouseState::update(double delta)
 {
-	
 	//RightButtonDown manipulated externally, do NOT change its value unless refactoring. 
 	if (LeftButtonDown == true && LastLeftButtonDown == false)
 	{
-		LastLeftButtonDown = true;
-		currstate = MakingSquare;
 		initPosition.x = wind->mapPixelToCoords(sf::Mouse::getPosition((*wind))).x;
 		initPosition.y = wind->mapPixelToCoords(sf::Mouse::getPosition((*wind))).y;
-		//sets up initial rectangle position
+		currstate = MakingSquare;
+		LastLeftButtonDown = true;
 		selectRect.setPosition(initPosition.x, initPosition.y);
+		if (GUIUp)
+		{
+			for (int i = 0; i < currGU->values.size(); i++)
+			{
+				if (currGU->values[i]->visual.getGlobalBounds().contains(sf::Vector2f(initPosition.x, initPosition.y)))
+				{
+					LastLeftButtonDown = false;
+					currGU->values[i]->currstate = GUIDependencies::ElementState::LEFTCLICKED;
+					currstate = RenderingGUI;
+				}
+			}
+		}
 	}
 	//If the left mouse button goes up then this code is executed.
 	else if (LeftButtonDown == false && LastLeftButtonDown == true)
 	{
-		TempUnitContainer.clear();
 		LastLeftButtonDown = false;
 		currstate = Idle;
-		//THE IF/ELSEIF BELOW REORIENT THE ORIGIN OF THE RECTANGLE TO THE TOP LEFT. DON'T EDIT(ITS FUCKING WEIRD) IF YOU DON'T WANT TO CHANGE RECT BEHAVIOR. 
+		TempUnitContainer.clear();
+		//THE IF/ELSEIFS BELOW REORIENT THE ORIGIN OF THE RECTANGLE TO THE TOP LEFT. DON'T EDIT(ITS FUCKING WEIRD) IF YOU DON'T WANT TO CHANGE RECT BEHAVIOR. 
 		if (std::sqrt(std::pow((Position.x - initPosition.x), 2)) / (Position.x - initPosition.x) == -1)
 		{
 			if (std::sqrt(std::pow((Position.y - initPosition.y), 2)) / (Position.y - initPosition.y) == 1)
@@ -96,18 +106,35 @@ void MouseState::update(double delta)
 			}
 		}
 		TempUnitContainer = gamemap->retrieveUnits(std::round(initPosition.x / 64), std::round(initPosition.y / 64), std::round(selectRect.getSize().x / 64), std::round(selectRect.getSize().y / 64));
+		if (TempUnitContainer.size() == 1)
+		{
+			currstate = RenderingGUI;
+		}
+		else
+		{
+			currstate = Idle;
+		}
 		selectRect.setSize(sf::Vector2f(0, 0));
 		curs.sleep = false;
-		//Gives all selected units to internal list
-
 	}
 	else if (RightButtonDown == true)
 	{
 		RightButtonDown = false;
 		LeftButtonDown = false;
-		currstate = GivingOrder;
 		orderPosition.x = wind->mapPixelToCoords(sf::Mouse::getPosition((*wind))).x;
 		orderPosition.y = wind->mapPixelToCoords(sf::Mouse::getPosition((*wind))).y;
+		currstate = GivingOrder;
+		if (GUIUp)
+		{
+			for (int i = 0; i < currGU->values.size(); i++)
+			{
+				if (currGU->values[i]->visual.getGlobalBounds().contains(sf::Vector2f(orderPosition.x, orderPosition.y)))
+				{
+					currGU->values[i]->currstate = GUIDependencies::ElementState::LEFTCLICKED;
+					currstate = RenderingGUI;
+				}
+			}
+		}
 	}
 	sf::Vector2f MousePosScrolling;
 	curs.update(delta);
@@ -151,7 +178,15 @@ void MouseState::update(double delta)
 				TempUnitContainer[i]->currstate = UnitDependencies::MOVING;
 			}
 		}
-		currstate = Idle;
+		if (lastState == RenderingGUI)
+		{
+			currstate = RenderingGUI;
+		}
+		else
+		{
+			currstate = Idle;
+		}
+		lastState = GivingOrder;
 		break;
 		//If this is called, the currControlGroupKey has been reset from the outside 
 	case CreatingControlGroup:
@@ -162,25 +197,41 @@ void MouseState::update(double delta)
 			{
 				controlgroups[i].associatedUnits = TempUnitContainer;
 				currstate = Idle;
+				lastState = CreatingControlGroup;
 				break;
 			}
 		}
 		currstate = Idle;
 		//If not, a control group will be created
 		controlgroups.push_back(ControlKey(currControlGroupKey, TempUnitContainer));
+		lastState = CreatingControlGroup;
 		break;
 	case SelectingControlGroup:
+		lastState = SelectingControlGroup;
 		for (int i = 0; i < controlgroups.size(); i++)
 		{
 			//If a control group with the sig provided has already been created, this will simply allocate the selected units to the previously created control group and exit the function
 			if (controlgroups[i].sig == currControlGroupKey)
 			{
-				currstate = Idle;
 				TempUnitContainer = controlgroups[i].associatedUnits;
+				currstate = Idle;
+				lastState = SelectingControlGroup;
 				break;
 			}
 		}
 		currstate = Idle;
+		break;
+	case RenderingGUI:
+		GUIUp = true;
+		if (TempUnitContainer.size() == 1)
+		{
+			currGU = &TempUnitContainer[0]->UnitUI;
+		}
+		currGU->update(delta);
+		lastState = RenderingGUI;
+		break;
+	case Idle:
+		lastState = Idle;
 		break;
 	}
 	moved = false;
@@ -209,6 +260,10 @@ void MouseState::create(map* gmap, sf::RenderWindow* win)
 }
 void MouseState::render(sf::RenderWindow* win)
 {
+	if (currstate == RenderingGUI)
+	{
+		currGU->render(win);
+	}
 	win->draw(selectRect);
 	curs.render(win);
 }

@@ -154,9 +154,11 @@
     <ClInclude Include="GUIDefs.h" />
     <ClInclude Include="LoopDefs.h" />
     <ClInclude Include="MapDefs.h" />
+    <ClInclude Include="ObjectDependencyDefs.h" />
     <ClInclude Include="ObjStates.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TeamDefs.h" />
     <ClInclude Include="UIElementDefs.h" />
     <ClInclude Include="UnitDefs.h" />
   </ItemGroup>
@@ -166,6 +168,7 @@
     <ClCompile Include="GUIImp.cpp" />
     <ClCompile Include="LoopImp.cpp" />
     <ClCompile Include="MapImp.cpp" />
+    <ClCompile Include="ObjectDependencyImp.cpp" />
     <ClCompile Include="ObjStates.cpp" />
     <ClCompile Include="PickleProject.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -174,6 +177,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TeamImp.cpp" />
     <ClCompile Include="UnitImp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
