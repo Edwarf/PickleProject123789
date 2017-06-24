@@ -2,6 +2,7 @@
 #include<SFML\Graphics.hpp>
 #include"MapDefs.h"
 #include"UnitDefs.h"
+#include"BuildingDefs.h"
 #include"GUIDefs.h"
 class cursor
 {
@@ -38,8 +39,11 @@ public:
 		ReadyingControlGroup,
 		CreatingControlGroup,
 		SelectingControlGroup,
-		RenderingGUI,
+		RenderingLoneUnit,
+		RenderingLoneBuilding,
+		RenderingPhantomBuilding,
 	};
+	state LastGUIState;
 	state lastState = Idle;
 	std::vector<ControlKey> controlgroups;
 	//this variable is for collecting potential control group keys. Initialized to unkown key.   
@@ -50,6 +54,7 @@ public:
 	MouseState();
 	//TempUnitContainer is cleared whenever a new unit selection box is created
 	std::vector<Unit*> TempUnitContainer;
+	std::vector<Building*> TempBuildingContainer;
 	MouseState(map* gmap, sf::RenderWindow* wind);
 	state currstate = Idle;
 	bool moved = false;
@@ -63,7 +68,11 @@ public:
 	sf::RectangleShape selectRect;
 	void update(double delta);
 	void render(sf::RenderWindow* win);
-	Collection*currGU;
+	Collection* currGU;
 	GUIDependencies gameGUIDependencies;
 	bool contains = false;
+	bool clicked = false;
+	PhantomBuilding* phantbuild;
+	int divertIntervalX;
+	sf::Vector2f directionOfVehicle;
 };

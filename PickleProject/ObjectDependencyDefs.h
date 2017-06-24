@@ -1,6 +1,8 @@
 #pragma once
 #include<SFML\Graphics.hpp>
 #include<iostream>
+class Element;
+class MouseState;
 class UnitDependencies
 {
 public:
@@ -27,8 +29,10 @@ public:
 	{
 		IDLE,
 		MOVING,
-		ATTACKING,
+		CONSTRUCTING,
 		REPOSITIONING,
+		ATTACKING,
+		DEAD,
 	};
 	enum UnitFaction
 	{
@@ -39,18 +43,44 @@ public:
 	{
 		//Not a unit, used in production
 		NULLUNITTYPE,
-		LeopardTank,
+		ModernCommander,
+		ModernLeopardTank,
+		ModernT1Engineer
 	};
-	static const int LeopardTankHP = 1000;
-	static const int LeopardTankIridiumCost = 100;
-	static const int LeopardTankKaskanCost = 100;
-	static const int LeopardTankArmor = 1;
-	static const int LeopardTankSpeed = 2;
-	static const int LeopardTankRange = 1;
-	static const int LeopardTankVisionRange = 3;
-	static constexpr double LeopardTankRof = 0.5;
-	static constexpr double LeopardTankDamage = 100;
+	static const int ModernLeopardTankHP = 1000;
+	static const int ModernLeopardTankIridiumCost = 100;
+	static const int ModernLeopardTankKaskanCost = 100;
+	static const int ModernLeopardTankArmor = 1;
+	static const int ModernLeopardTankSpeed = 2;
+	static const int ModernLeopardTankRange = 5;
+	static const int ModernLeopardTankVisionRange = 3;
+	static constexpr double ModernLeopardTankRof = 0.5;
+	static constexpr double ModernLeopardTankDamage = 100;
+	static const AttackType ModernLeopardTankAttackType = Laser;
 	sf::Texture LeopardTex;
+	//////////////////////////////////////////////////////
+	static constexpr double ModernT1EngineerHP = 500;
+	static const int  ModernT1EngineerIridiumCost = 150;
+	static const int ModernT1EngineerKaskanCost = 150;
+	static const int ModernT1EngineerArmor = 0;
+	static constexpr double ModernT1EngineerSpeed = 4;
+	static const int  ModernT1EngineerVisionRange = 2;
+	static const int  ModernT1EngineerRange = 3;
+	static constexpr double  ModernT1EngineerProductionRate = 20;
+	static const AttackType ModernT1EngineerAttackType = None;
+	sf::Texture ModernT1EngineeerTex;
+	///////////////////////////////////////////////////////
+	static constexpr double ModernCommanderHP = 50000;
+	static constexpr double ModernCommanderRof = 1.5;
+	static constexpr double ModernCommanderDamage = 500;
+	static constexpr double ModernCommanderProductionRate = 20;
+	static const int ModernCommanderArmor = 75;
+	static const int ModernCommanderRange = 8;
+	static const int ModernCommanderSpeed = 1;
+	static const int ModernCommanderVisionRange = 5;
+	static const AttackType ModernCommanderAttackType = Laser;
+	sf::Texture  ModernCommanderTex;
+	/////////////////////////////////////////////////////
 	UnitDependencies();
 };
 class BuildingDependencies
@@ -61,13 +91,29 @@ public:
 		IDLE,
 		//Constructing state is exclusively for production buildings
 		ACTING,
-
+		DEAD,
 	};
-
+	enum BuildingType
+	{
+		NULLBUILDINGTYPE,
+		ModernFactory,
+	};
+	static const int ModernFactoryIridiumCost = 1000;
+	static const int ModernFactoryKaskanCost = 1000;
+	static const int ModernFactoryTier = 1;
+	static const int ModernFactoryTileHeight = 3;
+	static const int ModernFactoryTileWidth = 3;
+	static const int ModernFactoryVisionRange = 4;
+	static constexpr double ModernFactoryProductionRate = 10;
+	static constexpr double ModernFactoryHP = 5000;
+	static constexpr double ModernFactoryArmor = 50;
+	sf::Texture ModernFactoryTex;
+	BuildingDependencies();
 };
 
 class GUIDependencies
 {
+	std::vector<std::vector<Element*>> GUIs;
 public:
 	enum ElementState
 	{
@@ -75,9 +121,15 @@ public:
 		LEFTCLICKED,
 		RIGHTCLICKED,
 	};
-	sf::Texture DefaultBackGroundGUITex;
+	sf::Texture ModernBackgroundBottomGUITex;
 	GUIDependencies();
-
+	//Modern Units
+	std::vector<Element*> GetModernLeopardTankUI(sf::RenderWindow* wind, BuildingDependencies* buildingdepend);
+	std::vector<Element*> GetModernT1EngineerUI(sf::RenderWindow* wind, BuildingDependencies* buildingdepend, MouseState* mouse);
+	//Modern Buildings
+	std::vector<Element*> GetModernFactoryUI(sf::RenderWindow* wind, UnitDependencies* unitdepend);
+	//Memory Management
+	void DeleteGUIs();
 };
 class TileDependencies
 {
@@ -94,7 +146,8 @@ public:
 		Aquatic,
 		Flatland,
 		Elevated,
-		ExtremeElevated
+		ExtremeElevated,
+		ANY
 	};
 	sf::Texture grasstex;
 	sf::Texture GoldenRocksTex;
@@ -109,4 +162,22 @@ public:
 	};
 	static constexpr double TeamIridiumCapacity = 1000;
 	static constexpr double TeamKaskanCapacity = 1000;
+};
+class ProjectileDependencies
+{
+public:
+	enum ProjectileType 
+	{
+		LaserRound,
+	};
+	enum ProjectileState
+	{
+		IDLE,
+		ONTARGET,
+		MOVING,
+		DEAD
+	};
+	ProjectileDependencies();
+	sf::Texture StandardLaserRound;
+	static const int StandardLaserRoundSpeed = 10;
 };

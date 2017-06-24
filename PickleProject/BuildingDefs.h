@@ -3,11 +3,17 @@
 #include"MapDefs.h"
 #include"UnitDefs.h"
 #include"CameraDefs.h"
+class Element;
 //Do not include GUIDefs in this file. Buildings should not interact with the GUI, the GUI should interact with buildings. 
 class Building
 {
 public:
+	virtual void CustomPrepUI() = 0;
+	Collection UIBuilding;
+	BuildingDependencies::BuildingType type;
+	UnitDependencies* unitdep;
 	GUIDependencies* guidep;
+	BuildingDependencies* builddep;
 	sf::RenderWindow* wind;
 	BuildingDependencies::BuildingStates currstate = BuildingDependencies::BuildingStates::IDLE;
 	sf::Sprite visual;
@@ -26,12 +32,14 @@ public:
 	void provideVision(double delta);
 	virtual void update(double delta) = 0;
 	virtual void render(sf::RenderWindow* wind) = 0;
+	void DefaultUISetup(GUIDependencies* gui, sf::RenderWindow* wind);
+	ProjectileDependencies* projectDepend;
 };
 class ProductionBuilding : public  Building
 {
 public:
+	void CustomPrepUI();
 	UnitDependencies::UnitType currProducingUnitType = UnitDependencies::UnitType::NULLUNITTYPE;
-	UnitDependencies* UnitDepend;
 	bool sufficientIridium = false;
 	bool sufficientKaskan = false;
 	double origProductionRate;
@@ -44,6 +52,11 @@ public:
 };
 class UnitProductionBuilding : public ProductionBuilding
 {
+	int startingPositionY;
+	sf::Vector2f NextOpenPosition();
+	std::vector<sf::Vector2f> UnitTileStartingPositions;
+	MouseState* mouse;
+public:
 	void render(sf::RenderWindow* wind);
 	void update(double delta);
 	void produce(double delta);
@@ -63,7 +76,12 @@ class UnitProductionBuilding : public ProductionBuilding
 		sf::Texture* tex,
 		GUIDependencies* guidepC,
 		UnitDependencies* unitdependC,
-		sf::RenderWindow* windC);
+		BuildingDependencies* buildingdependC,
+		sf::RenderWindow* windC,
+		std::vector<Element*> UIElems,
+		BuildingDependencies::BuildingType typeC,
+		MouseState* mouseC,
+		ProjectileDependencies* projectDependC);
 };
 class OffensiveBuilding : virtual Building
 {

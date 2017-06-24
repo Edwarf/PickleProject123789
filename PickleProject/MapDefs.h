@@ -27,11 +27,14 @@ public:
 };
 class map
 {
+	MouseState* mouse;
 	UnitDependencies* unitdep;
 	TileDependencies* tiledep;
 	BuildingDependencies* buildingdep;
 	GUIDependencies* guidep;
+	ProjectileDependencies* projectdepend;
 public:
+	tile* returnTile(int x, int y);
 	std::vector<Team> teams;
 	//This vector contains all tiles to be updated on the call. It is populated by the following functions: returnMapSquare
 	std::set<tile*> tileUpdates;
@@ -39,11 +42,12 @@ public:
 	std::vector<Unit> mapunits;
 	//takes all live unit pointers from the given rectangle of coordinates
 	std::vector<Unit*> retrieveUnits(int x, int y, int width, int height);
+	std::vector<Building*> retrieveBuildings(int x, int y, int width, int height);
 	TileDependencies Dependencies;
 	std::vector<std::vector<tile>> tilegrid;
-	map(int width, int height, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, sf::RenderWindow* win);
+	map(int width, int height, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, ProjectileDependencies* projectdependC,sf::RenderWindow* win, MouseState* mouseC);
 	map();
-	void create(int x, int y, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, sf::RenderWindow* win);
+	void create(int x, int y, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, ProjectileDependencies* projectdependC, sf::RenderWindow* win, MouseState* mouseC);
 	void renderpart(sf::RenderWindow* wind, int x, int y, int width, int height);
 	void update(double delta);
 	void render(sf::RenderWindow* wind);

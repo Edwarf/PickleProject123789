@@ -12,6 +12,7 @@ public:
 	TileDependencies TileDepend;
 	BuildingDependencies BuildingDepend;
 	UnitDependencies UnitDepend;
+	ProjectileDependencies ProjectileDepend;
 	map gamemap;
 	Camera cam;
 	sf::RenderWindow wind;

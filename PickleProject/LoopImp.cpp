@@ -9,7 +9,7 @@ void gameLoop::Initialize()
 	wind.setMouseCursorVisible(false);
 	//End of window setup
 	//map setup
-	gamemap.create(1000, 1000, 1, &UnitDepend, &TileDepend, &BuildingDepend, &mouse.gameGUIDependencies, &wind);
+	gamemap.create(1000, 1000, 4, &UnitDepend, &TileDepend, &BuildingDepend, &mouse.gameGUIDependencies, &ProjectileDepend, &wind, &mouse);
 	//map end
 	//camera setup
 	sf::Vector2f centerCam(0,0);

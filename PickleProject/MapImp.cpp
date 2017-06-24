@@ -35,12 +35,14 @@ void tile::render(sf::RenderWindow* wind)
 	wind->draw(visual);
 	visual.setColor(resetColor);
 }
-map::map(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, sf::RenderWindow* win)
+map::map(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, ProjectileDependencies* projectdependC, sf::RenderWindow* win, MouseState* mouseC)
 {
 	unitdep = unitdepC;
 	tiledep = tiledepC;
 	buildingdep = buildingdepC;
 	guidep = guidepC;
+	mouse = mouseC;
+	projectdepend = projectdependC;
 	sf::Vector2f vec(0, 0);
 	std::vector<tile> temp;
 	for (int i = 0; i < width; i++)
@@ -57,15 +59,17 @@ map::map(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, T
 	}
 	for (int i = 0; i < numberOfTeams; i++)
 	{
-		teams.push_back(Team(unitdep, tiledep, buildingdep, guidep, this, i, win));
+		teams.push_back(Team(unitdep, tiledep, buildingdep, guidep, projectdepend, this, i, win, mouse));
 	}
 }
-void map::create(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, sf::RenderWindow* win)
+void map::create(int height, int width, int numberOfTeams, UnitDependencies* unitdepC, TileDependencies* tiledepC, BuildingDependencies* buildingdepC, GUIDependencies* guidepC, ProjectileDependencies* projectdependC ,sf::RenderWindow* win, MouseState* mouseC)
 {
 	unitdep = unitdepC;
 	tiledep = tiledepC;
 	buildingdep = buildingdepC;
 	guidep = guidepC;
+	projectdepend = projectdependC;
+	mouse = mouseC;
 	sf::Vector2f vec(0, 0);
 	std::vector<tile> temp;
 	for (int i = 0; i < width; i++)
@@ -82,7 +86,7 @@ void map::create(int height, int width, int numberOfTeams, UnitDependencies* uni
 	}
 	for (int i = 0; i < numberOfTeams; i++)
 	{
-		teams.push_back(Team(unitdep, tiledep, buildingdep, guidep, this, i, win));
+		teams.push_back(Team(unitdep, tiledep, buildingdep, guidep, projectdepend, this, i, win, mouse));
 	}
 }
 map::map()
@@ -171,6 +175,52 @@ std::vector<Unit*> map::retrieveUnits(int x, int y, int height, int width)
 	}
 	return returner;
 }
+std::vector<Building*> map::retrieveBuildings(int x, int y, int height, int width)
+{	
+	std::set<Building*> initialreturner;
+	//Widthx utilizes bounds checking and is safe. Don't use raw values unless aware of the lack of bounds checking.
+	int widthx = width + x;
+	//Heighty utilizes bounds checking and is safe. Don't use raw values unless aware of the lack of bounds checking.
+	int heighty = height + y;
+	if (widthx > tilegrid.size())
+	{
+		widthx = tilegrid.size() - 1;
+	}
+	if (widthx < 0)
+	{
+		widthx = 1;
+	}
+	//Tile grid is a rectangle, using 0 as access value for column because all are identical and it doesn't matter
+	if (heighty > tilegrid[0].size())
+	{
+		heighty = tilegrid[0].size() - 1;
+
+	}
+	if (heighty < 0)
+	{
+		heighty = 1;
+	}
+	if (std::sqrt(std::pow(height, 2)) / height == 1)
+	{
+		for (int i = x; i < widthx; i++)
+		{
+			for (int z = y; z < heighty; z++)
+			{
+				if (tilegrid[i][z].currbuilding != nullptr)
+				{
+					initialreturner.insert(tilegrid[i][z].currbuilding);
+				}
+			}
+		}
+	}
+	//conver the set to a vector
+	std::vector<Building*> returner;
+	for (auto i : initialreturner)
+	{
+		returner.push_back(i);
+	}
+	return returner;
+}
 std::vector<tile*> map::returnMapSquare(int x, int y, int height, int width)
 {
 
@@ -210,4 +260,20 @@ std::vector<tile*> map::returnMapSquare(int x, int y, int height, int width)
 		}
 	}
 	return returner;
+}
+//RETURNS NULL IF OUT OF BOUNDS. DON'T USE WITHOUT CHECKING FOR A NULL RESULT
+tile* map::returnTile(int x, int y)
+{
+	if (x < 0 || y < 0)
+	{
+		return nullptr;
+	}
+	else if (x > tilegrid.size() || y > tilegrid[0].size())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return &tilegrid[x][y];
+	}
 }
