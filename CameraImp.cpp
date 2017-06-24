@@ -8,6 +8,8 @@ Camera::Camera(sf::Vector2f vec, map* currmap, int w, int h, sf::RenderWindow* w
 	currstate = Idle;
 	position = vec;
 	dispmap = currmap;
+	width = camview.getSize().x / 64;
+	height = camview.getSize().y / 64;
 	wind->setView(camview);
 }
 void Camera::CustomMove(sf::Vector2f desiredpos, double delta)

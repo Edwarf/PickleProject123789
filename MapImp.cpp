@@ -1,5 +1,6 @@
 #include"stdafx.h"
 #include"MapDefs.h"
+#include"UnitDefs.h"
 #include<iostream>
 TileDependencies::TileDependencies()
 {
@@ -63,12 +64,9 @@ map::map()
 }
 void map::update(double delta)
 {
-	for (int i = 0; i < tilegrid.size(); i++)
+	for (int i = 0; i < mapunits.size(); i++)
 	{
-		for (int z = 0; z < tilegrid[i].size(); z++)
-		{
-
-		}
+		//does not deal with unit cleanup, units themselves must erase their position
 	}
 }
 void map::render(sf::RenderWindow* window)
