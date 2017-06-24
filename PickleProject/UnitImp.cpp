@@ -914,6 +914,8 @@ void Commander::performAction(double delta)
 					}
 					for (int z = linkedBuilding->location.x; z < linkedBuilding->location.x + linkedBuilding->tilewidth; z++)
 					{
+						std::cout << "LULEDALO";
+
 						double comparatorx = std::sqrt(std::pow(positionfloat.x - z, 2));
 						if (comparatorx <  differenceStorage.y)
 						{
